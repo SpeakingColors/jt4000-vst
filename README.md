@@ -2,7 +2,7 @@
 
 <img src="assets/icon.svg" width="96" align="right" alt="icon">
 
-Controller plugin for the Behringer JT-4000 (JT-4000M MICRO) on Linux (repo created, planning stage).
+Controller plugin for the Behringer JT-4000 (JT-4000M MICRO) on Linux (planning stage; MIDI docs in docs/).
 
 ## Status
 Planning stage. Free and open source. Donations welcome (link coming).

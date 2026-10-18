@@ -1,25 +1,19 @@
 # JT-4000: device notes
 
-Model: Behringer JT-4000 (retail name JT-4000M MICRO). Earlier project notes said "JD-4000"; that name is wrong.
+Model: Behringer JT-4000 MICRO (also sold as JT-4000M). Earlier notes said "JD-4000": wrong. Source: Behringer Quick Start Guide V1.0.
 
-## What is confirmed
-Source: one retailer spec page (perfectcircuit.com, checked 2026-10-18). Not yet checked against Behringer's own manual.
-- 4-voice polyphonic hybrid synth
-- Two analog-modeling oscillators per voice, several waveshapes including supersaw, plus a 2-operator FM engine
-- 12 dB low-pass filter
-- Two ADSR envelopes (filter, amp), two LFOs
-- Multimode arpeggiator
-- 32 memory presets, 16 touch keys
-- USB and 3.5 mm MIDI input, USB-C bus power
+## Hardware facts
+- Portable 4-voice hybrid synth, two analog-modeling oscillators per voice ("based on 1990s JP8K" per the guide), optional two-operator FM
+- 12 dB/octave VCF, separate ADSR for VCA and VCF, two LFOs, arpeggiator
+- 32 editable presets, archivable by SysEx
+- USB-C (power, USB MIDI, firmware update), 3.5 mm MIDI input, 3.5 mm TRS headphones, 16-key touch keyboard, OLED display with oscilloscope trace
 
-## Not confirmed (do not build on these yet)
-- CC or NRPN map, SysEx, patch dump format
-- USB MIDI port names on Linux
-- Effects section
+## MIDI
+See [MIDI-IMPLEMENTATION.md](MIDI-IMPLEMENTATION.md).
 
-The Behringer manual and MIDI chart are not in the project folder or on the PC (checked 2026-10-18). Send the PDF or a capture and this file gets the real MIDI doc.
+## Existing editor
+Momo's JT-4000 Editor (paid, about 7 EUR, Windows/Mac VST/AU/standalone, iOS) already exists. It has no Linux build. Our controller will be free, open source, Linux-first.
 
-## Needed before building
-1. Behringer quick start guide and MIDI implementation chart.
+## Needed next
+1. Capture the synth's SysEx dump and any CC output with a MIDI monitor.
 2. USB MIDI port names on Linux.
-3. Whether parameters are CC or NRPN, and whether presets can be dumped over SysEx.
