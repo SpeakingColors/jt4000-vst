@@ -11,7 +11,9 @@ Model: Behringer JT-4000 MICRO (also sold as JT-4000M). Earlier notes said "JD-4
 ## MIDI
 See [MIDI-IMPLEMENTATION.md](MIDI-IMPLEMENTATION.md).
 
-## Existing editor
+## Existing editors
+A free browser editor also exists (behringer-jt4000m-editor.co.uk, Web MIDI, v1.03); it works in Chromium on Linux and is a handy way to test the CCs.
+
 Momo's JT-4000 Editor (paid, about 7 EUR, Windows/Mac VST/AU/standalone, iOS) already exists. It has no Linux build. Our controller will be free, open source, Linux-first.
 
 ## Needed next

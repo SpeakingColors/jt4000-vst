@@ -3,6 +3,7 @@
 Sources:
 - Behringer JT-4000 MICRO Quick Start Guide V1.0 (our project folder), controls section.
 - midi.guide database page for "Behringer JT-4000M MICRO" (last update 2026-02-04, 31 parameters), licensed CC BY-SA 4.0: https://midi.guide/d/behringer/jt-4000m-micro/ . The CC table below is from that dataset; please keep this credit and license if you copy it.
+- Second source for the CC numbers: the free web editor page https://www.behringer-jt4000m-editor.co.uk/ (v1.03, Web MIDI, not Safari) publishes the same table. All 31 CCs match midi.guide except OSC2 Wave (22 there, 25 on midi.guide). It publishes no SysEx, NRPN, wave names or value ranges.
 - The "User manual (32 pages)" PDF in the folder is only a 2-page stub (cover), nothing usable.
 
 Cross-check: the Quick Start Guide says "Extensive parameter control via MIDI CCs" and lists 32 editable presets that can be archived with SysEx. It does not print the CC numbers. The CC numbers come only from midi.guide and should be confirmed on the hardware (see Open items).
@@ -15,7 +16,7 @@ Cross-check: the Quick Start Guide says "Extensive parameter control via MIDI CC
 | Osc | OSC1 PWM / Supersaw detune / FM feedback | 113 | meaning depends on OSC1 wave |
 | Osc | OSC1 Coarse | 115 | centered |
 | Osc | OSC1 Fine | 111 | centered |
-| Osc | OSC2 Wave | 25 | |
+| Osc | OSC2 Wave | 25 or 22 | **sources disagree**: midi.guide says 25, behringer-jt4000m-editor.co.uk says 22. Test on hardware |
 | Osc | OSC2 PWM | 114 | |
 | Osc | OSC2 Coarse | 116 | centered |
 | Osc | OSC2 Fine | 112 | centered |
@@ -48,7 +49,8 @@ Cross-check: the Quick Start Guide says "Extensive parameter control via MIDI CC
 - Edited presets show `*` until saved with ENTER. Knob values apply only after the knob passes about 9 o'clock (pickup behaviour), per the guide.
 
 ## Open items
+0. OSC2 Wave CC: 25 or 22? Send both on the hardware and watch the display.
 1. CC list is from one community source: verify each CC on the hardware with a MIDI monitor (turn each control, watch the CC out, if the synth transmits).
 2. The panel has controls with no CC in the list: LFO2 destination, OSC2 PWM wave dependence, VCA amount, VCF trigger, arp settings, portamento mode, OSC/LFO wave value-to-name mapping (which CC value picks which wave). Need captures.
 3. SysEx patch dump format (PROG BULK SYX SEND, PROG SING SYX SEND) is not documented in our sources. Plan: put the synth in dump mode and capture the bytes with `amidi` / aseqdump on Linux, then document them here. That also gives a clean-room librarian format without touching any third-party editor.
-4. Third-party editor (Momo's JT-4000 Editor, paid, closed) exists. We do not reverse engineer it: its terms are not stated, and capturing the synth's own traffic gets the same data legally.
+4. Third-party editors exist: Momo's JT-4000 Editor (paid, closed) and a free browser editor (Web MIDI). Public pages of both were used for the CC list only. We do not decompile Momo's paid editor: its terms are not stated, and capturing the synth's own traffic gets the same data legally.
