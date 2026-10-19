@@ -1,0 +1,23 @@
+id,group,name,kind,a,b,min,max,def,range_src,hw
+cc_24,Osc,OSC1 Wave,cc,24,0,0,127,0,assumed,0
+cc_113,Osc,OSC1 PWM / Supersaw detune / FM feedback,cc,113,0,0,127,0,assumed,0
+cc_115,Osc,OSC1 Coarse,cc,115,0,0,127,0,assumed,0
+cc_111,Osc,OSC1 Fine,cc,111,0,0,127,0,assumed,0
+cc_114,Osc,OSC2 PWM,cc,114,0,0,127,0,assumed,0
+cc_116,Osc,OSC2 Coarse,cc,116,0,0,127,0,assumed,0
+cc_112,Osc,OSC2 Fine,cc,112,0,0,127,0,assumed,0
+cc_29,Osc,OSC balance,cc,29,0,0,127,0,assumed,0
+cc_71,Filter,Resonance,cc,71,0,0,127,0,assumed,0
+cc_74,Filter,Cutoff,cc,74,0,0,127,0,assumed,0
+cc_47,Filter,Envelope amount,cc,47,0,0,127,0,assumed,0
+cc_56,LFO1,Destination,cc,56,0,0,127,0,assumed,0
+cc_54,LFO1,Wave,cc,54,0,0,127,0,assumed,0
+cc_70,LFO1,Amount,cc,70,0,0,127,0,assumed,0
+cc_72,LFO1,Rate,cc,72,0,0,127,0,assumed,0
+cc_55,LFO2,Wave,cc,55,0,0,127,0,assumed,0
+cc_73,LFO2,Rate,cc,73,0,0,127,0,assumed,0
+cc_28,LFO2,Amount,cc,28,0,0,127,0,assumed,0
+cc_1,Mod,Mod wheel,cc,1,0,0,127,0,assumed,0
+cc_95,Mod,Ring mod amount,cc,95,0,0,127,0,assumed,0
+cc_96,Mod,Ring mod on/off,cc,96,0,0,127,0,assumed,0
+cc_5,General,Portamento time,cc,5,0,0,127,0,assumed,0
