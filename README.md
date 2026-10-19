@@ -5,7 +5,7 @@
 Controller plugin for the Behringer JT-4000 (JT-4000M MICRO) on Linux (planning stage; MIDI docs in docs/).
 
 ## Status
-Planning stage. Free and open source. Donations welcome (link coming).
+Planning stage. Free and open source. Donations welcome: https://ko-fi.com/studio87
 
 ## Docs
 - [Device notes](docs/DEVICE-NOTES.md): what is confirmed from manuals, and what is still missing.
