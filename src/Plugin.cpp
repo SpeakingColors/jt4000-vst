@@ -60,6 +60,12 @@ public:
     bool deviceConnected() const { return connected.load(); }
     juce::String deviceName() const { return devNameStr; }
     void scanNow() { scanDevices(); }
+    // Windows MIDI ports can usually be opened by one program at a time, so on Windows the direct connection starts OFF (the DAW keeps the port).
+#if JUCE_WINDOWS
+    std::atomic<bool> directOn{ false };
+#else
+    std::atomic<bool> directOn{ true };
+#endif
     void releaseResources() override {}
     bool isBusesLayoutSupported(const BusesLayout&) const override { return true; }
 
@@ -120,7 +126,7 @@ public:
 
     void getStateInformation(juce::MemoryBlock& dest) override
     {
-        juce::XmlElement x("STATE"); x.setAttribute("v", 1); x.setAttribute("midi_channel", channelParam->get());
+        juce::XmlElement x("STATE"); x.setAttribute("v", 1); x.setAttribute("midi_channel", channelParam->get()); x.setAttribute("direct", directOn.load() ? 1 : 0);
         for (auto& s : slots) x.setAttribute(s.param->paramID, s.param->get());
         for (size_t i = 0; i < slots.size(); ++i) { const int c = learn.ccFor(int(i)); if (c >= 0) x.setAttribute("learn_" + slots[i].param->paramID, c); }
         copyXmlToBinary(x, dest);
@@ -130,6 +136,7 @@ public:
         if (auto x = getXmlFromBinary(data, size))
         {
             if (!x->hasTagName("STATE")) return;
+            if (x->hasAttribute("direct")) directOn = x->getIntAttribute("direct", 0) != 0;
             const int ch = x->getIntAttribute("midi_channel", 1); *channelParam = juce::jlimit(1, 16, ch);
             for (auto& s : slots) if (x->hasAttribute(s.param->paramID)) setFromState(s, x->getIntAttribute(s.param->paramID));
             learn.clear();
@@ -174,6 +181,7 @@ private:
     void handleIncomingMidiMessage(juce::MidiInput*, const juce::MidiMessage& m) override { collector.addMessageToQueue(m); }
     void scanDevices()
     {
+        if (! directOn.load()) { devIn.reset(); devInId.clear(); { juce::SpinLock::ScopedLockType l(devLock); devOut.reset(); } hasOut = false; devOutId.clear(); connected = false; devNameStr = {}; return; }
         juce::MidiDeviceInfo fin, fout; bool hi = false, ho = false;
         for (auto& d : juce::MidiInput::getAvailableDevices()) if (ctl::isJt4000Name(d.name.toStdString())) { fin = d; hi = true; break; }
         for (auto& d : juce::MidiOutput::getAvailableDevices()) if (ctl::isJt4000Name(d.name.toStdString())) { fout = d; ho = true; break; }

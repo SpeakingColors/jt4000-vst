@@ -11,7 +11,7 @@ Controller plugin for the Behringer JT-4000 (JT-4000M MICRO) (VST3 and standalon
 ## Status
 **Early build v0.2 (pre-release on the Releases page).** A MIDI controller plugin (VST3 and standalone) that sends and receives the CC messages listed in [map/params.csv](map/params.csv).
 
-- Auto-connect (v0.2): the plugin looks for a JT-4000 among the system MIDI ports (name contains JT-4000) and talks to it directly; otherwise it uses the DAW MIDI output. The port name is not documented and **not tested with a real device yet**.
+- Auto-connect (v0.2): the plugin looks for a JT-4000 among the system MIDI ports (name contains JT-4000) and talks to it directly; otherwise it uses the DAW MIDI output. The Direct button turns this off (it starts OFF on Windows, where a MIDI port usually can be opened by one program only, so the DAW keeps it). The port name is not documented and **not tested with a real device yet**.
 - Panel editor (v0.2): knobs, an OLED style display with a scope trace, LED buttons and MIDI learn. Controls with no known CC (OSC2 Wave, LFO2 destination, envelope faders, arp, presets) are drawn but do nothing.
 - 22 parameters, taken from: Behringer JT-4000 MICRO (community CC list, not from a Behringer manual). 
 - **None are tested on the real device yet.** The map only holds what the source above lists; ranges the manual does not print are assumed to be 0 to 127 and are marked that way in the plugin.

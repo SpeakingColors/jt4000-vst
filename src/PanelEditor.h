@@ -214,7 +214,7 @@ public:
         downB->onClick = [this] { nudge(-8); }; upB->onClick = [this] { nudge(8); };
         learnB->onClick = [this] { learnOn = ! learnOn; proc.learnTarget = -1; learnB->setLit(learnOn); learnB->setSub(learnOn ? "ARMED" : "OFF"); armIfSelected(); };
 
-        rescan.setButtonText("Find device"); rescan.setTooltip("Looks for a connected JT-4000 now. The plugin also looks every two seconds."); rescan.onClick = [this] { proc.scanNow(); };
+        rescan.setTooltip("Direct connection: the plugin finds a JT-4000 on the system MIDI ports and talks to it itself. Turn it OFF if your DAW already uses the JT-4000 MIDI port (on Windows a port is often usable by one program only)."); rescan.onClick = [this] { proc.directOn = ! proc.directOn.load(); proc.scanNow(); updateDirectText(); }; updateDirectText();
         sendAll.setButtonText("Send all"); sendAll.setTooltip("Sends every parameter value to the device now."); sendAll.onClick = [this] { proc.sendAll(); };
         clearLearn.setButtonText("Clear learned"); clearLearn.setTooltip("Removes every MIDI learn assignment."); clearLearn.onClick = [this] { proc.learn.clear(); proc.learnTarget = -1; };
         chLabel.setText("MIDI channel", juce::dontSendNotification); chLabel.setColour(juce::Label::textColourId, labelCol());
@@ -285,6 +285,7 @@ public:
 
 private:
     struct Section { juce::Rectangle<float> r; const char* title; bool teal; };
+    void updateDirectText() { rescan.setButtonText(proc.directOn.load() ? "Direct: ON" : "Direct: OFF"); }
     void armIfSelected() { proc.learnTarget = (learnOn && sel != nullptr && sel->slotIndex >= 0) ? sel->slotIndex : -1; }
     void nudge(int d)
     {
@@ -299,7 +300,7 @@ private:
     }
     void refreshDisplay()
     {
-        display.topL = "MIDI CH " + juce::String(proc.channelParam->get()).paddedLeft('0', 2); display.topR = proc.deviceConnected() ? juce::String("JT-4000 CONNECTED") : juce::String("NO DEVICE, HOST MIDI");
+        display.topL = "MIDI CH " + juce::String(proc.channelParam->get()).paddedLeft('0', 2); display.topR = proc.deviceConnected() ? juce::String("JT-4000 CONNECTED") : (proc.directOn.load() ? juce::String("NO DEVICE, HOST MIDI") : juce::String("DIRECT OFF, HOST MIDI"));
         if (sel != nullptr)
         {
             display.name = sel->spec.full; display.value = sel->param != nullptr ? juce::String(sel->param->get()).paddedLeft(' ', 3) : juce::String("---");
