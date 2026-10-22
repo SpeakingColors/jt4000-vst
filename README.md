@@ -6,6 +6,8 @@ Controller plugin for the Behringer JT-4000 (JT-4000M MICRO) (VST3 and standalon
 
 **Manual:** [PDF, opens in the browser](https://github.com/SpeakingColors/jt4000-vst/blob/main/docs/jt4000-vst-manual.pdf)
 
+<p align="center"><img src="docs/screenshot.png" alt="JT-4000 Controller editor" width="900"></p>
+
 ## Status
 **Early build v0.1 (pre-release on the Releases page).** A MIDI controller plugin (VST3 and standalone) that sends and receives the CC messages listed in [map/params.csv](map/params.csv).
 

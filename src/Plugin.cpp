@@ -142,7 +142,7 @@ private:
 class ParamRow : public juce::Component
 {
 public:
-    ParamRow(juce::AudioParameterInt& p, const juce::String& info) : label(p.getName(100)), tip(info)
+    ParamRow(juce::AudioParameterInt& p, const juce::String& info) : label(p.getName(100), p.getName(100)), tip(info)
     {
         addAndMakeVisible(label); addAndMakeVisible(slider);
         slider.setSliderStyle(juce::Slider::LinearHorizontal); slider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 48, 20);
