@@ -33,4 +33,13 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/third_party/JUCE/CMakeLists.txt)
     target_include_directories(JT4000Controller PRIVATE src)
     target_compile_definitions(JT4000Controller PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0 JUCE_DISPLAY_SPLASH_SCREEN=0)
     target_link_libraries(JT4000Controller PRIVATE JT4000ControllerData cat_ui::cat_ui juce::juce_audio_utils juce::juce_recommended_config_flags juce::juce_recommended_warning_flags)
+
+    # Processor level MIDI test: feeds MIDI buffers into the real processor. Run: ctest, or build/JT4000ProcTest_artefacts/JT4000ProcTest
+    juce_add_console_app(JT4000ProcTest PRODUCT_NAME "JT4000ProcTest")
+    target_sources(JT4000ProcTest PRIVATE tests/processor_test.cpp src/Plugin.cpp)
+    target_include_directories(JT4000ProcTest PRIVATE src)
+    target_compile_definitions(JT4000ProcTest PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_MODAL_LOOPS_PERMITTED=1)
+    set_target_properties(JT4000ProcTest PROPERTIES EXCLUDE_FROM_ALL TRUE)   # built on demand (CI builds it on Linux), so release builds stay lean
+    target_link_libraries(JT4000ProcTest PRIVATE JT4000ControllerData cat_ui::cat_ui juce::juce_audio_utils juce::juce_recommended_config_flags)
+    add_test(NAME processor COMMAND JT4000ProcTest)
 endif()

@@ -29,6 +29,9 @@ jobs:
         run: |
           set -o pipefail
           (cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release --parallel 4) 2>&1 | tee build.log
+      - if: runner.os == 'Linux'
+        name: Processor MIDI test
+        run: cmake --build build --target JT4000ProcTest --parallel 4 && build/JT4000ProcTest_artefacts/Release/JT4000ProcTest
       - if: failure()
         shell: bash
         run: grep -E "error|Error" build.log | head -15 | while IFS= read -r l; do echo "::error::${l:0:400}"; done

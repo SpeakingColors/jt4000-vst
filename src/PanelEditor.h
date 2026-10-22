@@ -6,8 +6,6 @@
 
 namespace panel
 {
-using catui::SodaPop;
-
 inline juce::Colour navyTop()   { return juce::Colour(0xff41568a); }
 inline juce::Colour navyBot()   { return juce::Colour(0xff2c3a63); }
 inline juce::Colour frameCol()  { return juce::Colour(0xff14161d); }
@@ -67,7 +65,7 @@ public:
 };
 
 // ----- one knob with its label -----
-class KnobCell : public juce::Component
+class KnobCell : public juce::Component, public juce::SettableTooltipClient
 {
 public:
     KnobCell(const Spec& sp, juce::AudioParameterInt* p, std::function<void(KnobCell*)> sel) : spec(sp), param(p), onSel(std::move(sel))
@@ -84,12 +82,13 @@ public:
     void mouseDown(const juce::MouseEvent&) override { onSel(this); }
     void resized() override
     {
-        auto r = getLocalBounds(); const int th = juce::jmax(12, int((float) r.getHeight() * 0.26f)); auto text = r.removeFromBottom(th);
-        const int d = juce::jmin(r.getWidth(), r.getHeight()); slider.setBounds(r.withSizeKeepingCentre(d, d)); textArea = text;
+        const int w = getWidth(), h = getHeight(); const int d = juce::jmax(8, juce::jmin(w, int((float) h * 0.74f))); const int th = juce::jmax(12, int((float) d * 0.36f));
+        const int top = juce::jmax(0, (h - d - th) / 2);
+        slider.setBounds((w - d) / 2, top, d, d); textArea = juce::Rectangle<int>(0, top + d, w, th);
     }
     void paint(juce::Graphics& g) override
     {
-        auto t = textArea.toFloat(); const float fs = juce::jmax(9.f, t.getHeight() * 0.48f);
+        auto t = textArea.toFloat(); const float fs = juce::jmax(8.f, juce::jmin(t.getHeight() * 0.48f, (float) getWidth() * 0.14f));
         g.setColour(labelCol()); g.setFont(juce::FontOptions(fs, juce::Font::bold));
         g.drawText(spec.label, t.removeFromTop(t.getHeight() * 0.55f), juce::Justification::centred, true);
         g.setColour(dimLabel()); g.setFont(juce::FontOptions(fs * 0.85f));
@@ -102,7 +101,7 @@ private:
 };
 
 // ----- an envelope fader without a known CC (display only) -----
-class FaderCell : public juce::Component
+class FaderCell : public juce::Component, public juce::SettableTooltipClient
 {
 public:
     FaderCell(const char* l, const char* grp, const char* full) : label(l), group(grp)
@@ -213,14 +212,15 @@ public:
         downB->onClick = [this] { nudge(-8); }; upB->onClick = [this] { nudge(8); };
         learnB->onClick = [this] { learnOn = ! learnOn; proc.learnTarget = -1; learnB->setLit(learnOn); learnB->setSub(learnOn ? "ARMED" : "OFF"); armIfSelected(); };
 
+        rescan.setButtonText("Find device"); rescan.setTooltip("Looks for a connected JT-4000 now. The plugin also looks every two seconds."); rescan.onClick = [this] { proc.scanNow(); };
         sendAll.setButtonText("Send all"); sendAll.setTooltip("Sends every parameter value to the device now."); sendAll.onClick = [this] { proc.sendAll(); };
         clearLearn.setButtonText("Clear learned"); clearLearn.setTooltip("Removes every MIDI learn assignment."); clearLearn.onClick = [this] { proc.learn.clear(); proc.learnTarget = -1; };
         chLabel.setText("MIDI channel", juce::dontSendNotification); chLabel.setColour(juce::Label::textColourId, labelCol());
         chSlider.setSliderStyle(juce::Slider::IncDecButtons); chSlider.setTextBoxStyle(juce::Slider::TextBoxLeft, false, 36, 24);
         chAttach = std::make_unique<juce::SliderParameterAttachment>(*proc.channelParam, chSlider);
-        status.setText("Values are the community CC list, not tested on the device yet. Turn on CC receive and transmit on the device.", juce::dontSendNotification);
+        status.setText("CC list from the community, not tested on the device yet.", juce::dontSendNotification);
         status.setColour(juce::Label::textColourId, dimLabel()); status.setFont(juce::FontOptions(12.f));
-        for (auto* w : std::initializer_list<juce::Component*>{ &sendAll, &clearLearn, &chLabel, &chSlider, &status }) addAndMakeVisible(*w);
+        for (auto* w : std::initializer_list<juce::Component*>{ &sendAll, &rescan, &clearLearn, &chLabel, &chSlider, &status }) addAndMakeVisible(*w);
 
         select(osc.size() > 0 ? filter[0].get() : nullptr);   // starts on the cutoff knob
         gate.onFrame = [this] { refreshDisplay(); }; gate.start(15);
@@ -266,10 +266,10 @@ public:
         grid(osc, inner(A[1]), 4, 2);
         { auto a = inner(A[2]); auto big = a.removeFromTop(int((float) a.getHeight() * 0.62f)); filter[0]->setBounds(big.removeFromLeft(big.getWidth() / 2)); filter[1]->setBounds(big);
           filter[2]->setBounds(a.removeFromLeft(a.getWidth() / 2)); }
-        grid(lfo1, inner(B[0]), 4, 1); grid(lfo2, inner(B[1]), 4, 1); grid(mix, inner(B[2]), 3, 2);
+        grid(lfo1, inner(B[0]), 2, 2); grid(lfo2, inner(B[1]), 2, 2); grid(mix, inner(B[2]), 3, 2);
         { auto a = inner(B[3]); for (size_t i = 0; i < faders.size(); ++i) faders[i]->setBounds(a.getX() + a.getWidth() * int(i) / 8, a.getY(), a.getWidth() / 8, a.getHeight()); }
         // bottom bar
-        sendAll.setBounds(bottom.removeFromLeft(100)); bottom.removeFromLeft(8); clearLearn.setBounds(bottom.removeFromLeft(110)); bottom.removeFromLeft(14);
+        sendAll.setBounds(bottom.removeFromLeft(100)); bottom.removeFromLeft(8); rescan.setBounds(bottom.removeFromLeft(100)); bottom.removeFromLeft(8); clearLearn.setBounds(bottom.removeFromLeft(110)); bottom.removeFromLeft(14);
         chLabel.setBounds(bottom.removeFromLeft(90)); chSlider.setBounds(bottom.removeFromLeft(96)); bottom.removeFromLeft(14); status.setBounds(bottom);
         refreshDisplay();
     }
@@ -297,7 +297,7 @@ private:
     }
     void refreshDisplay()
     {
-        display.topL = "MIDI CH " + juce::String(proc.channelParam->get()).paddedLeft('0', 2); display.topR = "CC MAP: UNVERIFIED";
+        display.topL = "MIDI CH " + juce::String(proc.channelParam->get()).paddedLeft('0', 2); display.topR = proc.deviceConnected() ? juce::String("JT-4000 CONNECTED") : juce::String("NO DEVICE, HOST MIDI");
         if (sel != nullptr)
         {
             display.name = sel->spec.full; display.value = sel->param != nullptr ? juce::String(sel->param->get()).paddedLeft(' ', 3) : juce::String("---");
@@ -322,7 +322,7 @@ private:
     std::vector<KnobCell*> all; KnobCell* sel = nullptr; bool learnOn = false;
     std::vector<std::unique_ptr<KnobCell>> osc, filter, lfo1, lfo2, mix; std::vector<std::unique_ptr<FaderCell>> faders;
     std::unique_ptr<LedButton> prevB, nextB, arpB, downB, upB, learnB; std::vector<Section> sections;
-    juce::TextButton sendAll, clearLearn; juce::Label chLabel, status; juce::Slider chSlider; std::unique_ptr<juce::SliderParameterAttachment> chAttach;
+    juce::TextButton sendAll, rescan, clearLearn; juce::Label chLabel, status; juce::Slider chSlider; std::unique_ptr<juce::SliderParameterAttachment> chAttach;
 
     inline static const Spec oscSpec[8] = { { "WAVE", 24, "OSC1 Wave" }, { "PWM/DET/FB", 113, "OSC1 PWM / Supersaw detune / FM feedback" }, { "COARSE", 115, "OSC1 Coarse" }, { "FINE", 111, "OSC1 Fine" },
                                             { "WAVE", -1, "OSC2 Wave" }, { "PWM", 114, "OSC2 PWM" }, { "COARSE", 116, "OSC2 Coarse" }, { "FINE", 112, "OSC2 Fine" } };

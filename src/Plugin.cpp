@@ -1,6 +1,7 @@
 // JT-4000 Controller controller plugin (Studio 87). Sends and receives the MIDI CC / NRPN listed in map/params.csv.
 // Parameters are automatable. Incoming CC from the device moves the parameters; the plugin never echoes it back.
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_audio_devices/juce_audio_devices.h>
 #include <atomic>
 #include <memory>
 #include "BinaryData.h"
@@ -21,7 +22,7 @@ ctl::ParseResult loadMap()
 }
 }
 
-class CtlProcessor : public juce::AudioProcessor, private juce::AudioProcessorParameter::Listener, private juce::Timer
+class CtlProcessor : public juce::AudioProcessor, private juce::AudioProcessorParameter::Listener, private juce::Timer, private juce::MidiInputCallback
 {
 public:
     CtlProcessor() : AudioProcessor(BusesProperties()), mapRes(loadMap()), decoder(mapRes.params)
@@ -38,9 +39,9 @@ public:
         reserved = ctl::reservedCCs(mapRes.params);
         pending = std::make_unique<std::atomic<int>[]>(slots.size()); learnedIn = std::make_unique<std::atomic<int>[]>(slots.size()); lastRecv = std::make_unique<std::atomic<int>[]>(slots.size()); incoming = std::make_unique<std::atomic<int>[]>(slots.size());
         for (size_t i = 0; i < slots.size(); ++i) { learnedIn[i] = -1; pending[i] = -1; lastRecv[i] = -1; incoming[i] = -1; slots[i].param->addListener(this); }
-        startTimerHz(30);
+        collector.reset(48000); startTimerHz(30);
     }
-    ~CtlProcessor() override { stopTimer(); for (auto& s : slots) s.param->removeListener(this); }
+    ~CtlProcessor() override { stopTimer(); devIn.reset(); { juce::SpinLock::ScopedLockType l(devLock); devOut.reset(); } for (auto& s : slots) s.param->removeListener(this); }
 
     const ctl::ParseResult mapRes;
     struct Slot { juce::AudioParameterInt* param = nullptr; int map = 0; };
@@ -53,13 +54,20 @@ public:
     ctl::LearnMap learn;
     std::atomic<int> learnTarget{ -1 };
 
-    void prepareToPlay(double, int) override { decoder.reset(); }
+    void prepareToPlay(double sr, int) override { decoder.reset(); collector.reset(sr > 0 ? sr : 48000.0); }
+
+    // Direct connection: the plugin looks for the JT-4000 among the system MIDI ports and talks to it itself, so no DAW routing is needed.
+    bool deviceConnected() const { return connected.load(); }
+    juce::String deviceName() const { return devNameStr; }
+    void scanNow() { scanDevices(); }
     void releaseResources() override {}
     bool isBusesLayoutSupported(const BusesLayout&) const override { return true; }
 
     void processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) override
     {
         juce::ScopedNoDenormals nd; audio.clear();
+        { juce::MidiBuffer dev; collector.removeNextBlockOfMessages(dev, juce::jmax(1, audio.getNumSamples()));   // messages that arrived from the directly connected device
+          for (const auto m : dev) midi.addEvent(m.getMessage(), juce::jmin(m.samplePosition, juce::jmax(0, audio.getNumSamples() - 1))); }
         // 1. incoming from the device: CC messages are consumed here, everything else passes through unchanged
         juce::MidiBuffer passthru;
         for (const auto meta : midi)
@@ -71,20 +79,29 @@ public:
                 if (target >= 0 && ! reserved[size_t(ccn)]) { learn.bind(ccn, target); learnTarget = -1; continue; }   // MIDI learn: this CC now drives that knob
                 const int ls = learn.slotFor(ccn);
                 if (ls >= 0 && ls < int(slots.size())) { learnedIn[size_t(ls)] = msg.getControllerValue(); continue; }
-                if (auto e = decoder.feedCC(msg.getControllerNumber(), msg.getControllerValue()))
+                if (auto e = decoder.feedCC(ccn, msg.getControllerValue()))
+                {
                     for (size_t i = 0; i < slots.size(); ++i) if (slots[i].map == e->paramIndex) { incoming[i] = e->value; break; }
+                }
+                else if (ccn != 6 && ccn != 98 && ccn != 99) passthru.addEvent(msg, meta.samplePosition);   // CCs that are not in the map (sustain pedal, ...) pass through
             }
             else passthru.addEvent(msg, meta.samplePosition);
         }
         midi.swapWith(passthru);
         // 2. outgoing: changed parameters, a few per block
-        const int ch = channelParam->get(); const int n = int(slots.size()); int sent = 0, pos = 0;
+        const int ch = channelParam->get(); const int n = int(slots.size()); int sent = 0, pos = 0; juce::MidiBuffer outgoing;
         for (int k = 0; k < n && sent < kPerBlock; ++k)
         {
             const int i = (rotate + k) % n; const int v = pending[size_t(i)].exchange(-1); if (v < 0) continue;
             for (const auto& m : ctl::encode(mapRes.params[size_t(slots[size_t(i)].map)], ch, v))
-            { const juce::uint8 bytes[3] = { m.status, m.d1, m.d2 }; midi.addEvent(bytes, 3, juce::jmin(pos++, juce::jmax(0, audio.getNumSamples() - 1))); }
+            { const juce::uint8 bytes[3] = { m.status, m.d1, m.d2 }; outgoing.addEvent(bytes, 3, juce::jmin(pos++, juce::jmax(0, audio.getNumSamples() - 1))); }
             ++sent; rotate = (i + 1) % n;
+        }
+        if (! outgoing.isEmpty())
+        {
+            bool direct = false;
+            { juce::SpinLock::ScopedTryLockType l(devLock); if (l.isLocked() && devOut) { devOut->sendBlockOfMessagesNow(outgoing); direct = true; } }
+            if (! direct) for (const auto m : outgoing) midi.addEvent(m.getMessage(), m.samplePosition);   // no device found: send to the host's MIDI output instead
         }
     }
 
@@ -130,6 +147,7 @@ private:
     void parameterGestureChanged(int, bool) override {}
     void timerCallback() override
     {
+        if (++scanTick >= 60) { scanTick = 0; scanDevices(); }
         if (lastSeen.size() != slots.size()) { lastSeen.resize(slots.size()); for (size_t i = 0; i < slots.size(); ++i) lastSeen[i] = slots[i].param->get(); }
         // device to host: a parameter set from incoming MIDI is never sent back out
         for (size_t i = 0; i < slots.size(); ++i)
@@ -153,6 +171,26 @@ private:
         }
     }
 
+    void handleIncomingMidiMessage(juce::MidiInput*, const juce::MidiMessage& m) override { collector.addMessageToQueue(m); }
+    void scanDevices()
+    {
+        juce::MidiDeviceInfo fin, fout; bool hi = false, ho = false;
+        for (auto& d : juce::MidiInput::getAvailableDevices()) if (ctl::isJt4000Name(d.name.toStdString())) { fin = d; hi = true; break; }
+        for (auto& d : juce::MidiOutput::getAvailableDevices()) if (ctl::isJt4000Name(d.name.toStdString())) { fout = d; ho = true; break; }
+        if (hi && (devIn == nullptr || devInId != fin.identifier)) { devIn.reset(); if (auto i = juce::MidiInput::openDevice(fin.identifier, this)) { devIn = std::move(i); devInId = fin.identifier; devIn->start(); } }
+        if (! hi && devIn != nullptr) { devIn.reset(); devInId.clear(); }
+        if (ho && (! hasOut || devOutId != fout.identifier))
+        {
+            auto o = juce::MidiOutput::openDevice(fout.identifier);
+            { juce::SpinLock::ScopedLockType l(devLock); devOut = std::move(o); }
+            hasOut = devOut != nullptr; devOutId = hasOut ? fout.identifier : juce::String();
+        }
+        if (! ho && hasOut) { { juce::SpinLock::ScopedLockType l(devLock); devOut.reset(); } hasOut = false; devOutId.clear(); }
+        connected = hasOut; devNameStr = hasOut ? fout.name : juce::String();
+    }
+
+    juce::MidiMessageCollector collector; juce::SpinLock devLock; std::unique_ptr<juce::MidiInput> devIn; std::unique_ptr<juce::MidiOutput> devOut;
+    juce::String devInId, devOutId, devNameStr; bool hasOut = false; int scanTick = 0; std::atomic<bool> connected{ false };
     ctl::Decoder decoder;
     std::unique_ptr<std::atomic<int>[]> pending, lastRecv, incoming, learnedIn; std::array<bool, 128> reserved{};
     std::vector<int> lastSeen; int rotate = 0;

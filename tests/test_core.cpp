@@ -42,6 +42,9 @@ int main(int argc, char** argv)
         Decoder dd(r.params); std::optional<Event> last; for (auto& msg : encode(p, 1, p.maxV)) last = dd.feedCC(msg.d1, msg.d2);
         CHECK(last && r.params[size_t(last->paramIndex)].id == p.id && last->value == p.maxV);
     }
+    // device name detection
+    CHECK(isJt4000Name("JT-4000 MICRO") && isJt4000Name("JT-4000M MICRO MIDI 1") && isJt4000Name("Behringer JT4000") && isJt4000Name("jt_4000"));
+    CHECK(!isJt4000Name("Midi Through") && !isJt4000Name("UltraNova") && !isJt4000Name("JT-8000") && !isJt4000Name(""));
     // MIDI learn
     { LearnMap lm; CHECK(lm.slotFor(21) == -1); lm.bind(21, 3); CHECK(lm.slotFor(21) == 3 && lm.ccFor(3) == 21);
       lm.bind(22, 3); CHECK(lm.slotFor(21) == -1 && lm.slotFor(22) == 3);   // one CC per slot

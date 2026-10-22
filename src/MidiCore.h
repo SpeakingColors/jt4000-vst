@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <cctype>
 #include <cstdint>
 #include <optional>
 #include <set>
@@ -120,6 +121,14 @@ inline std::array<bool, 128> reservedCCs(const std::vector<Param>& map)
     std::array<bool, 128> r{}; r[6] = r[98] = r[99] = true;
     for (const auto& p : map) if (p.kind != Kind::NRPN) { r[size_t(p.a)] = true; if (p.kind == Kind::Pair) r[size_t(p.b)] = true; }
     return r;
+}
+
+// True when a MIDI port name looks like the JT-4000 MICRO ("JT-4000 MICRO", "JT-4000M MICRO", "Behringer JT-4000", ...).
+// The exact USB port name is not documented, so this only looks for the model number; it is checked on real hardware later.
+inline bool isJt4000Name(const std::string& name)
+{
+    std::string n; for (char c : name) { if (c == ' ' || c == '-' || c == '_') continue; n += char(std::tolower((unsigned char) c)); }
+    return n.find("jt4000") != std::string::npos;
 }
 
 // Turns incoming CC messages into parameter events. Follows the NRPN CC 99 / 98 / 6 sequence.
