@@ -2,6 +2,8 @@
 // Only things listed in map/params.csv are ever sent. Nothing here invents SysEx.
 #pragma once
 #include <algorithm>
+#include <array>
+#include <atomic>
 #include <cstdint>
 #include <optional>
 #include <set>
@@ -96,6 +98,29 @@ inline std::vector<Msg> encode(const Param& p, int ch, int val)
 }
 
 struct Event { int paramIndex = -1; int value = 0; };
+
+// MIDI learn: binds an incoming CC number (from another controller) to one parameter slot.
+// Safe to read on the audio thread while the UI binds (plain atomics). Reserved CCs are refused.
+class LearnMap
+{
+public:
+    LearnMap() { clear(); }
+    void clear() { for (auto& a : byCC) a.store(-1); }
+    void bind(int cc, int slot) { if (cc < 0 || cc > 127 || slot < 0) return; unbindSlot(slot); byCC[size_t(cc)].store(slot); }
+    void unbindSlot(int slot) { for (auto& a : byCC) if (a.load() == slot) a.store(-1); }
+    int slotFor(int cc) const { return cc >= 0 && cc < 128 ? byCC[size_t(cc)].load() : -1; }
+    int ccFor(int slot) const { for (int i = 0; i < 128; ++i) if (byCC[size_t(i)].load() == slot) return i; return -1; }
+private:
+    std::array<std::atomic<int>, 128> byCC;
+};
+
+// CCs that must never be learned: the ones the device map uses (so the device itself keeps working) and the NRPN selectors.
+inline std::array<bool, 128> reservedCCs(const std::vector<Param>& map)
+{
+    std::array<bool, 128> r{}; r[6] = r[98] = r[99] = true;
+    for (const auto& p : map) if (p.kind != Kind::NRPN) { r[size_t(p.a)] = true; if (p.kind == Kind::Pair) r[size_t(p.b)] = true; }
+    return r;
+}
 
 // Turns incoming CC messages into parameter events. Follows the NRPN CC 99 / 98 / 6 sequence.
 class Decoder

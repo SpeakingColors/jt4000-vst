@@ -9,8 +9,9 @@ Controller plugin for the Behringer JT-4000 (JT-4000M MICRO) (VST3 and standalon
 <p align="center"><img src="docs/screenshot.png" alt="JT-4000 Controller editor" width="900"></p>
 
 ## Status
-**Early build v0.1 (pre-release on the Releases page).** A MIDI controller plugin (VST3 and standalone) that sends and receives the CC messages listed in [map/params.csv](map/params.csv).
+**Early build v0.2 (pre-release on the Releases page).** A MIDI controller plugin (VST3 and standalone) that sends and receives the CC messages listed in [map/params.csv](map/params.csv).
 
+- Panel editor (v0.2): knobs, an OLED style display with a scope trace, LED buttons and MIDI learn. Controls with no known CC (OSC2 Wave, LFO2 destination, envelope faders, arp, presets) are drawn but do nothing.
 - 22 parameters, taken from: Behringer JT-4000 MICRO (community CC list, not from a Behringer manual). 
 - **None are tested on the real device yet.** The map only holds what the source above lists; ranges the manual does not print are assumed to be 0 to 127 and are marked that way in the plugin.
 - The CC list comes from midi.guide (CC BY-SA 4.0) and a free web editor page; one conflict (OSC2 Wave 25 vs 22) is still open.

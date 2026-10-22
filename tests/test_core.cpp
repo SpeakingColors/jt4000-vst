@@ -42,6 +42,13 @@ int main(int argc, char** argv)
         Decoder dd(r.params); std::optional<Event> last; for (auto& msg : encode(p, 1, p.maxV)) last = dd.feedCC(msg.d1, msg.d2);
         CHECK(last && r.params[size_t(last->paramIndex)].id == p.id && last->value == p.maxV);
     }
+    // MIDI learn
+    { LearnMap lm; CHECK(lm.slotFor(21) == -1); lm.bind(21, 3); CHECK(lm.slotFor(21) == 3 && lm.ccFor(3) == 21);
+      lm.bind(22, 3); CHECK(lm.slotFor(21) == -1 && lm.slotFor(22) == 3);   // one CC per slot
+      lm.bind(22, 5); CHECK(lm.slotFor(22) == 5 && lm.ccFor(3) == -1);       // one slot per CC
+      lm.bind(300, 1); lm.bind(-1, 1); CHECK(lm.ccFor(1) == -1);             // out of range is ignored
+      lm.clear(); CHECK(lm.slotFor(22) == -1);
+      auto res = reservedCCs(r.params); CHECK(res[5] && res[14] && res[46] && res[6] && res[98] && res[99] && !res[21]); }
     // the real map of this repo
     if (argc > 1)
     {

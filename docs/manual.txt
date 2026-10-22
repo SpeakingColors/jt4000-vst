@@ -1,19 +1,28 @@
 # Intro
-JT-4000 Controller sends and receives the MIDI messages (CC and NRPN) of the Behringer JT-4000 MICRO, so you can control the synth from your DAW, automate it, and see its settings change in the plugin. It is an early build: the editor is a searchable list of every control.
+JT-4000 Controller sends and receives the MIDI messages (CC and NRPN) of the Behringer JT-4000 MICRO, so you can control the synth from your DAW, automate it, and see its settings change in the plugin. The editor is a panel with knobs, a display and MIDI learn, drawn after the look of the hardware (navy panel, orange labels, black knobs, cyan display). It is an early build.
 
 # Quick start
 - On the Behringer JT-4000 MICRO, turn on MIDI CC receive and transmit (and NRPN where the device has the option).
 - Insert the plugin on a MIDI track whose output goes to the Behringer JT-4000 MICRO, and send the track's MIDI to the device. Set the plugin's MIDI channel to the one the device listens on.
-- Move a value in the list: the matching message is sent to the device. Turn a knob on the device: the value moves in the plugin.
-- Use the group menu and the search box to find a control. Send all sends every value to the device at once.
-- Every control is an automatable parameter in your DAW.
+- Drag a knob (or use the mouse wheel): the matching message is sent to the device. Turn a knob on the device: the knob moves in the plugin.
+- Click a knob to select it. The display shows its name, value and CC number. VALUE - and VALUE + change the selected knob by 8.
+- Send all sends every value to the device at once. MIDI channel sets the channel used for sending.
+- Every knob is an automatable parameter in your DAW.
+
+# MIDI learn
+- Press LEARN (the LED turns red), click a knob, then move a knob or fader on your own MIDI controller. That CC now moves the knob, and the device follows.
+- Press LEARN again to switch it off. Clear learned removes every assignment. Assignments are saved in your DAW project.
+- A CC that the device map already uses cannot be learned, so the device itself keeps working.
+
+# Controls without a known CC
+- OSC2 WAVE, LFO2 DEST, the eight envelope faders, ARP and the PRESET buttons are drawn dashed or greyed. No CC is known for them yet, so they do nothing. They are there so the panel looks complete and so the map can be filled in later.
 
 # Honest status
 - The map has 22 entries (Osc, Filter, LFO1, LFO2, Mod, General). It was written from the maker's documentation, nothing was invented.
-- None of the 22 controls has been tested on the real device. Every control is marked "not tested on hardware yet" in the list. A range that the documentation does not print is assumed to be 0 to 127 and is marked that way.
+- None of the 22 controls has been tested on the real device. Every knob tooltip says "not tested on hardware yet". A range that the documentation does not print is assumed to be 0 to 127 and is marked that way.
 - No SysEx and no patch librarian yet. Nothing is sent that is not in the map.
 - Incoming messages from the device are consumed by the plugin and never echoed back. At most 16 values are sent per audio block so the device is not flooded.
 
 # Window
-- Resize by dragging any edge or corner; the shape stays the same. Hover a control for its address (CC or NRPN number).
+- Resize by dragging any edge or corner; the shape stays the same. Hover a control for its tooltip (name, CC number and status).
 - Free and open source. The plugin collects no data and never touches the network.
