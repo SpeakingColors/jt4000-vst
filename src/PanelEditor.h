@@ -17,6 +17,8 @@ inline juce::Colour oledBg()    { return juce::Colour(0xff0b1220); }
 inline juce::Colour oledText()  { return juce::Colour(0xff3fd0ff); }
 inline juce::Colour oledSoft()  { return juce::Colour(0xff8fe6ff); }
 
+inline float textWidth(const juce::Font& f, const juce::String& t) { juce::GlyphArrangement ga; ga.addLineOfText(f, t, 0.f, 0.f); return ga.getBoundingBox(0, -1, true).getWidth(); }
+
 struct Spec { const char* label; int cc; const char* full; };   // cc -1: no known CC yet
 
 // ----- look and feel for knobs and faders -----
@@ -131,7 +133,7 @@ public:
     {
         auto r = getLocalBounds().toFloat(); const float a = isEnabled() ? 1.f : 0.5f; const float fs = juce::jmax(9.f, r.getHeight() * 0.2f);
         auto chip = r.removeFromTop(r.getHeight() * 0.3f); auto subA = r.removeFromBottom(r.getHeight() * 0.26f);
-        g.setFont(juce::FontOptions(fs, juce::Font::bold)); const float tw = g.getCurrentFont().getStringWidthFloat(label) + fs;
+        g.setFont(juce::FontOptions(fs, juce::Font::bold)); const float tw = textWidth(g.getCurrentFont(), label) + fs;
         auto c = chip.withSizeKeepingCentre(juce::jmin(tw, chip.getWidth()), chip.getHeight() * 0.9f);
         g.setColour(frameCol().withAlpha(a)); g.fillRoundedRectangle(c, c.getHeight() * 0.4f);
         g.setColour(orangeLbl().withAlpha(a)); g.drawText(label, c, juce::Justification::centred, true);
@@ -235,7 +237,7 @@ public:
             if (s.teal) { g.setColour(tealCol()); g.fillRoundedRectangle(s.r, 14.f); }
             g.setColour(frameCol()); g.drawRoundedRectangle(s.r.reduced(1.5f), 14.f, 3.f);
             const float fs = juce::jmax(11.f, (float) getHeight() * 0.026f); g.setFont(juce::FontOptions(fs, juce::Font::bold));
-            const float tw = g.getCurrentFont().getStringWidthFloat(s.title) + fs * 1.6f;
+            const float tw = textWidth(g.getCurrentFont(), s.title) + fs * 1.6f;
             juce::Rectangle<float> tab(s.r.getX() + 18.f, s.r.getY() - fs * 0.75f, tw, fs * 1.5f);
             g.setColour(frameCol()); g.fillRoundedRectangle(tab, fs * 0.5f); g.setColour(orangeLbl()); g.drawText(s.title, tab, juce::Justification::centred);
         }
