@@ -1,6 +1,8 @@
 # Roadmap
 
 - [x] Quick Start Guide read, panel menus documented
+- [x] Release packaging: installers (Windows, macOS, Linux Flatpak extension), uninstallers and PDF manual built by the release workflow (test builds, not tested on real machines)
+- [x] Plugin skeleton: MIDI core with tests, JUCE plugin, CI (the editor is a searchable list of controls, not the panel yet)
 - [x] CC map documented (midi.guide, CC BY-SA 4.0), needs hardware check
 - [ ] Verify CCs on hardware with a MIDI monitor
 - [ ] Capture the SysEx dump (single and bulk) and document the format
