@@ -240,6 +240,7 @@ public:
             const float tw = textWidth(g.getCurrentFont(), s.title) + fs * 1.6f;
             juce::Rectangle<float> tab(s.r.getX() + 18.f, s.r.getY() - fs * 0.75f, tw, fs * 1.5f);
             g.setColour(frameCol()); g.fillRoundedRectangle(tab, fs * 0.5f); g.setColour(orangeLbl()); g.drawText(s.title, tab, juce::Justification::centred);
+            if (juce::String(s.title).startsWith("VCF ENV")) { g.setColour(frameCol().withAlpha(0.8f)); g.drawLine(s.r.getCentreX(), s.r.getY() + fs * 1.4f, s.r.getCentreX(), s.r.getBottom() - fs * 0.8f, 2.f); }
         }
     }
 
