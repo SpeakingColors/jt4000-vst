@@ -12,7 +12,7 @@ add_test(NAME core COMMAND core_test ${CMAKE_SOURCE_DIR}/map/params.csv)
 if(EXISTS ${CMAKE_SOURCE_DIR}/third_party/JUCE/CMakeLists.txt)
     add_subdirectory(third_party/JUCE)
     include(FetchContent)
-    FetchContent_Declare(cat_ui GIT_REPOSITORY https://github.com/SpeakingColors/cat-ui GIT_TAG main GIT_SHALLOW TRUE)
+    FetchContent_Declare(cat_ui GIT_REPOSITORY https://github.com/SpeakingColors/cat-ui GIT_TAG c247023b9e61e1eda3de6f1da8170f08c4376501 GIT_SHALLOW TRUE)
     FetchContent_MakeAvailable(cat_ui)
 
     juce_add_binary_data(JT4000ControllerData SOURCES map/params.csv)
