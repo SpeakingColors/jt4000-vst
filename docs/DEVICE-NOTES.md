@@ -9,7 +9,7 @@ Model: Behringer JT-4000 MICRO (also sold as JT-4000M). Earlier notes said "JD-4
 - USB-C (power, USB MIDI, firmware update), 3.5 mm MIDI input, 3.5 mm TRS headphones, 16-key touch keyboard, OLED display with oscilloscope trace
 
 ## MIDI
-See [MIDI-IMPLEMENTATION.md](MIDI-IMPLEMENTATION.md).
+See [MIDI-IMPLEMENTATION.md](MIDI-IMPLEMENTATION.md). No official Behringer CC chart or SysEx document has been found (checked 2026-11-15); all CC numbers are UNVERIFIED community data and untested on hardware. Behringer's product page says the synth has USB MIDI and a 3.5 mm MIDI input.
 
 ## Existing editors
 A free browser editor also exists (behringer-jt4000m-editor.co.uk, Web MIDI, v1.03); it works in Chromium on Linux and is a handy way to test the CCs.
