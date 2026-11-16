@@ -13,6 +13,8 @@ Sources:
 - Second source for the CC numbers: the free web editor page https://www.behringer-jt4000m-editor.co.uk/ (v1.03, Web MIDI, not Safari) publishes the same table. All 31 CCs match midi.guide except OSC2 Wave (22 there, 25 on midi.guide). It publishes no SysEx, NRPN, wave names or value ranges.
 - The "User manual (32 pages)" PDF in the folder is only a 2-page stub (cover), nothing usable.
 
+Update 2026-11 (research pass, official document not read): a web search says the multilingual Behringer Quick Start Guide for the JT-4000M MICRO ("QSG_BE_0722-ACI_JT-4000M MICRO_WW.pdf", on Music Tribe's media server) has a MIDI continuous controller table (CC number and what it acts on). The copy of the guide this project used may be a different edition, and the earlier note below that it prints no CC numbers is therefore unconfirmed. The research session could not download the PDF (host not reachable), so nothing in the table below has been checked against it. Third-party mirrors of that guide disagree about CC 28 (LFO2 or LFO1 amount); this repo keeps midi.guide's LFO2 until the official page is read. Next step: read the CC table in the official guide, compare row by row, and change the Status column below from "untested" to "documented" for rows that match.
+
 Cross-check: the Quick Start Guide says "Extensive parameter control via MIDI CCs" and lists 32 editable presets that can be archived with SysEx. It does not print the CC numbers. The CC numbers come only from midi.guide and should be confirmed on the hardware (see Open items).
 
 ## CC map (community list, every row UNVERIFIED, untested on hardware)
@@ -44,6 +46,8 @@ Cross-check: the Quick Start Guide says "Extensive parameter control via MIDI CC
 | Mod | Ring mod amount | 95 | | UNVERIFIED (midi.guide, community) |
 | Mod | Ring mod on/off | 96 | 0 to 64 off, 65 to 127 on | UNVERIFIED (midi.guide, community) |
 | General | Portamento time | 5 | | UNVERIFIED (midi.guide, community) |
+
+Status: no row is "documented" (manual) or "captured" (owner's device); all are untested. The plugin map holds 22 of these (the OSC2 Wave CC is left out because the sources disagree). The eight envelope CCs (81 to 88) are listed above but not in map/params.csv, so the plugin sends none of them until they are checked.
 
 ## Panel menus (Quick Start Guide), A = first parameter, B = second, per menu button
 - OSC-X: OSC1 A wave (Off, triangle, square, PWM, saw, supersaw, FM, noise), B detune (supersaw) or feedback (FM, 0 to 99%); OSC1 PWM; OSC1 coarse / fine; OSC2 A wave (Off, triangle, square, PWM, saw, noise), PWM, coarse / fine; Porta A amount, B mode (portamento or glissando); Ring A amount, B on/off; program name edit.

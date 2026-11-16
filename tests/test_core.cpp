@@ -59,6 +59,8 @@ int main(int argc, char** argv)
         for (auto& er : real.errors) std::printf("map error: %s\n", er.c_str());
         CHECK(real.errors.empty());
         int hw = 0, usable = 0; for (auto& p : real.params) { hw += p.hwVerified; usable += p.kind != Kind::Pair; }
+        // untested data must stay marked untested; the disputed OSC2 Wave CC (22 vs 25) must not be sent
+        for (auto& p : real.params) { CHECK(!p.hwVerified); CHECK(!(p.kind == Kind::CC && (p.a == 22 || p.a == 25))); }
         std::printf("map: %zu entries, %d usable, %d verified on hardware\n", real.params.size(), usable, hw);
         for (auto& p : real.params) if (p.kind != Kind::Pair)
         { Decoder dd(real.params); std::optional<Event> last; for (auto& msg : encode(p, 1, p.defV)) last = dd.feedCC(msg.d1, msg.d2); CHECK(last && real.params[size_t(last->paramIndex)].id == p.id); }

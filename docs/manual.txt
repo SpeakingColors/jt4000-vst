@@ -18,11 +18,11 @@ JT-4000 Controller sends and receives the MIDI messages (CC and NRPN) of the Beh
 - OSC2 WAVE, LFO2 DEST, the eight envelope faders, ARP and the PRESET buttons are drawn dashed or greyed. No CC is known for them yet, so they do nothing. They are there so the panel looks complete and so the map can be filled in later.
 
 # Honest status
-- The map has 22 entries (Osc, Filter, LFO1, LFO2, Mod, General). It was written from the maker's documentation, nothing was invented.
+- The map has 22 entries (Osc, Filter, LFO1, LFO2, Mod, General). It comes from a community CC list (midi.guide) and a free web editor, not from a Behringer MIDI chart; nothing was invented.
 - None of the 22 controls has been tested on the real device. Every knob tooltip says "not tested on hardware yet". A range that the documentation does not print is assumed to be 0 to 127 and is marked that way.
 - No SysEx and no patch librarian yet. Nothing is sent that is not in the map.
 - Incoming messages from the device are consumed by the plugin and never echoed back. At most 16 values are sent per audio block so the device is not flooded.
 
 # Window
 - Resize by dragging any edge or corner; the shape stays the same. Hover a control for its tooltip (name, CC number and status).
-- Free and open source. The plugin collects no data and never touches the network.
+- Free and open source (AGPL-3.0-or-later), made by Studio 87.

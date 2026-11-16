@@ -343,7 +343,7 @@ public:
     {
         addAndMakeVisible(frame); frame.content().addAndMakeVisible(view);
         frame.header().onInfo = [this] { juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::InfoIcon, "JT-4000 Controller",
-            "Free and open source by Studio 87. Values come from a community CC list, not a Behringer manual. Nothing is sent that is not in the map, and nothing is invented. Support: ko-fi.com/studio87"); };
+            "Free and open source by Studio 87. Values come from a community CC list and are not tested on the device yet. Only entries in the map are sent. Support: ko-fi.com/studio87"); };
         setResizable(true, true); getConstrainer()->setFixedAspectRatio(1180.0 / 720.0); setResizeLimits(590, 360, 2360, 1440); setSize(1180, 720);
     }
     void resized() override { frame.setBounds(getLocalBounds()); }
