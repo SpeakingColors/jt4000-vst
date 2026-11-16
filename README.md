@@ -15,10 +15,10 @@ Controller plugin for the Behringer JT-4000 (JT-4000M MICRO) (VST3 and standalon
 
 - Auto-connect (v0.2): the plugin looks for a JT-4000 among the system MIDI ports (name contains JT-4000) and talks to it directly; otherwise it uses the DAW MIDI output. The Direct button turns this off (it starts OFF on Windows, where a MIDI port usually can be opened by one program only, so the DAW keeps it). The port name is not documented and **not tested with a real device yet**.
 - Panel editor (v0.2): knobs, an OLED style display with a scope trace, LED buttons and MIDI learn. Controls with no known CC (OSC2 Wave, LFO2 destination, envelope faders, arp, presets) are drawn but do nothing.
-- 22 parameters, taken from: Behringer JT-4000 MICRO (community CC list, not from a Behringer manual). 
+- 22 parameters, taken from: Behringer JT-4000 MICRO (community CC list, not from a Behringer manual).
 - **None are tested on the real device yet.** The map only holds what the source above lists; ranges the manual does not print are assumed to be 0 to 127 and are marked that way in the plugin.
 - The CC list comes from midi.guide (CC BY-SA 4.0) and a free web editor page; one conflict (OSC2 Wave 25 vs 22) is still open.
-- No SysEx and no patch librarian yet. Nothing is sent that is not in the map.
+- No SysEx and no patch librarian yet.
 - Not tested in a DAW yet. Builds in CI on Linux, Windows and macOS.
 
 How it behaves: every entry is an automatable parameter. Moving it sends MIDI to the device, and incoming CC from the device moves it; incoming CC is consumed, never echoed back. At most 16 parameters are sent per audio block so the device is not flooded. Turn on CC receive and transmit on the device.
